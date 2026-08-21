@@ -1,0 +1,3 @@
+ezdxf[draw]
+# Optional IFC/BIM workflow; enable only when the project has a verified IFC model.
+# ifcopenshell

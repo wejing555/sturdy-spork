@@ -1,0 +1,36 @@
+id: sprinkler.obstruction-width.example
+status: draft
+
+source:
+  standard: null
+  edition: null
+  clause: null
+  page: null
+  evidence_file: null
+
+statement: "待核条文：当障碍物宽度大于（B）m时，其下方应增设喷头。"
+
+parameters:
+  threshold:
+    symbol: B
+    value_m: null
+    status: pending_verification
+  obstruction_width:
+    value_m: null
+    status: required_input
+  obstruction_bottom_elevation:
+    value_m: null
+    status: required_input
+  ceiling_elevation:
+    value_m: null
+    status: required_input
+
+decision:
+  operator: ">"
+  action: "review_sprinkler_below_obstruction"
+  status: pending_verification
+
+notes:
+  - "B 是题目/条文中的占位符，程序不得自行猜测。"
+  - "本文件不是施工图，也不构成喷头定位依据。"
+  - "正式使用前必须补齐规范、版本、条文、页码和项目图纸出处。"
