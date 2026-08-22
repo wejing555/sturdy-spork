@@ -1,0 +1,80 @@
+name: Drawing Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      input_dir:
+        description: "Repository directory containing PDFs"
+        required: true
+        default: "drawings"
+      render_mode:
+        description: "Render mode: none, candidates, all"
+        required: true
+        default: "candidates"
+      dpi:
+        description: "PNG render DPI"
+        required: true
+        default: "220"
+  push:
+    paths:
+      - "drawings/**/*.pdf"
+      - "tools/scan_drawings.py"
+      - ".github/workflows/drawing-scan.yml"
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install scanner dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "PyMuPDF>=1.24,<2"
+
+      - name: Resolve inputs
+        id: cfg
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "input_dir=${{ inputs.input_dir }}" >> "$GITHUB_OUTPUT"
+            echo "render_mode=${{ inputs.render_mode }}" >> "$GITHUB_OUTPUT"
+            echo "dpi=${{ inputs.dpi }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "input_dir=drawings" >> "$GITHUB_OUTPUT"
+            echo "render_mode=candidates" >> "$GITHUB_OUTPUT"
+            echo "dpi=220" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Scan PDFs
+        shell: bash
+        run: |
+          mkdir -p scan_output
+          if [ ! -d "${{ steps.cfg.outputs.input_dir }}" ]; then
+            echo "Input directory does not exist: ${{ steps.cfg.outputs.input_dir }}" >&2
+            exit 2
+          fi
+          python tools/scan_drawings.py "${{ steps.cfg.outputs.input_dir }}" \
+            --out scan_output \
+            --render "${{ steps.cfg.outputs.render_mode }}" \
+            --dpi "${{ steps.cfg.outputs.dpi }}"
+
+      - name: Upload scan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drawing-scan-${{ github.run_number }}
+          path: scan_output/
+          if-no-files-found: error
+          retention-days: 30

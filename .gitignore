@@ -7,4 +7,9 @@ dist/
 build/
 *.egg-info/
 output/
+scan_output/
 .DS_Store
+
+# IMPORTANT: keep project drawings out of this PUBLIC repository.
+# Use a private repository or run tools/scan_drawings.py locally.
+private_drawings/
